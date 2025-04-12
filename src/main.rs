@@ -16,7 +16,7 @@ struct Args {
     home: PathBuf,
     #[arg(short, long = "listen-at", default_value = "127.0.0.1")]
     listen_addr: String,
-    #[arg(long, short, default_value_t = 4545)]
+    #[arg(long, short, default_value_t = 8080)]
     port: u16
 }
 
