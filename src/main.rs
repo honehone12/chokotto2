@@ -14,7 +14,7 @@ use tokio::fs;
 struct Args {
     #[arg(long)]
     home: PathBuf,
-    #[arg(short, long = "listen-at", default_value = "127.0.0.1")]
+    #[arg(short, long = "listen-at", default_value = "0.0.0.0")]
     listen_addr: String,
     #[arg(long, short, default_value_t = 8080)]
     port: u16
@@ -106,7 +106,13 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt().init();
+    if cfg!(debug_assertions) {
+        tracing_subscriber::fmt().init();
+    } else {
+        tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::WARN)
+            .init();
+    }
     
     let Args { home, listen_addr, port } = Args::parse();
     
