@@ -1,0 +1,5 @@
+[workspace]
+members = [ "chokotto2_client", "chokotto2_server" ]
+resolver = "2"
+
+[workspace.dependencies]
