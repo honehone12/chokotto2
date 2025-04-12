@@ -4,5 +4,7 @@ WORKDIR /chokotto
 
 COPY target/release/chokotto2 /chokotto/chokotto2
 
-CMD ["/chokotto/chokotto2"]
+USER nonroot:nonroot
+
+ENTRYPOINT ["/chokotto/chokotto2"]
 
