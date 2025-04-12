@@ -1,7 +1,7 @@
 use std::{
     fs, 
     net::IpAddr, 
-    path::{Path, PathBuf}, 
+    path::PathBuf, 
     sync::OnceLock
 };
 use salvo::{prelude::*, routing::PathFilter};
@@ -23,6 +23,8 @@ struct Properties {
     pub_dir: PathBuf
 }
 
+const R: &str = r"^(?:[a-zA-Z0-9_-]+|(?:\.[a-zA-Z0-9_-]+)+)(?:\.[a-zA-Z0-9]+)*$";
+
 static PROPS: OnceLock<Properties> = OnceLock::new();
 
 #[tokio::main]
@@ -43,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
     PROPS.set(Properties { pub_dir: home.clone() })
         .expect("static properties are already initialized");
 
-    let r = Regex::new(r"^(?:[a-zA-Z0-9_]+|(?:\.[a-zA-Z0-9_]+)+)(?:\.[a-zA-Z0-9_]+)*$")?;
+    let r = Regex::new(R)?;
     PathFilter::register_wisp_regex("file", r);
     let router = Router::new()
         // .push(Router::with_path("upload").post())
@@ -55,4 +57,31 @@ async fn main() -> anyhow::Result<()> {
     Server::new(tcp_listener).try_serve(router).await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use regex::Regex;
+    use super::R;
+
+    #[test]
+    fn test_regex() {
+        let regex = match Regex::new(R) {
+            Ok(r) => r,
+            Err(e) => panic!("{e}")
+        };
+        assert!(regex.is_match("my_av_1-9.mp4"));
+        assert!(regex.is_match("my_av_1-9.mp4.jpg"));
+        assert!(regex.is_match(".anan"));
+        assert!(regex.is_match(".tonight.fun.av"));
+        assert!(regex.is_match("oh---good____"));
+        assert!("!#$%&'()=~^|@`{[]}:*;+<>,/?\"\\ あいアイ愛¥".chars().all(|c| {
+            !regex.is_match(&c.to_string())            
+        }));
+        assert!(!regex.is_match("..oh...good"));
+        assert!(!regex.is_match("."));        
+        assert!(!regex.is_match(""));
+        assert!(!regex.is_match("my_av_1-9.mp_4"));
+        assert!(!regex.is_match("my_av_1-9.mp-4"));
+    }
 }
