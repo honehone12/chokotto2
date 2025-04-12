@@ -106,13 +106,7 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    if cfg!(debug_assertions) {
-        tracing_subscriber::fmt()
-            .with_max_level(tracing::Level::INFO).init();
-    } else {
-        tracing_subscriber::fmt().init();
-    }
-
+    tracing_subscriber::fmt().init();
     
     let Args { home, listen_addr, port } = Args::parse();
     
