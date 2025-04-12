@@ -1,5 +1,12 @@
-[workspace]
-members = [ "chokotto2_client", "chokotto2_server" ]
-resolver = "2"
+[package]
+name = "chokotto2"
+version = "0.1.0"
+edition = "2024"
 
-[workspace.dependencies]
+[dependencies]
+salvo = { version = "0.77.1", features = ["anyhow"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+anyhow = "1.0.97"
+clap = "4.5.36"
+tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros"] }
