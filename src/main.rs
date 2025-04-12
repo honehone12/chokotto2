@@ -7,6 +7,7 @@ use std::{
 use salvo::{prelude::*, routing::PathFilter};
 use clap::Parser;
 use regex::Regex;
+use tracing::info;
 
 #[derive(Parser)]
 struct Args {
@@ -14,13 +15,13 @@ struct Args {
     home: PathBuf,
     #[arg(short, long = "listen-at", default_value = "127.0.0.1")]
     listen_addr: String,
-    #[arg(long, short, default_value_t = 80)]
+    #[arg(long, short, default_value_t = 8080)]
     port: u16
 }
 
 #[derive(Debug)]
 struct Properties {
-    pub_dir: PathBuf
+    home: PathBuf
 }
 
 const R: &str = r"^(?:[a-zA-Z0-9_-]+|(?:\.[a-zA-Z0-9_-]+)+)(?:\.[a-zA-Z0-9]+)*$";
@@ -32,17 +33,17 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .init();
-    let Args { mut home, listen_addr, port } = Args::parse();
+    let Args { home, listen_addr, port } = Args::parse();
     
-    home.push("Public");
     if !fs::exists(&home)? {
         fs::create_dir_all(&home)?
     }
+    info!("home is: {home:?}");
 
     let listen_addr = listen_addr.parse::<IpAddr>()?;
     let tcp_listener = TcpListener::new((listen_addr, port)).try_bind().await?;
 
-    PROPS.set(Properties { pub_dir: home.clone() })
+    PROPS.set(Properties { home: home.clone() })
         .expect("static properties are already initialized");
 
     let r = Regex::new(R)?;
