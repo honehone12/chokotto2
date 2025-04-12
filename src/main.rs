@@ -83,5 +83,6 @@ mod test {
         assert!(!regex.is_match(""));
         assert!(!regex.is_match("my_av_1-9.mp_4"));
         assert!(!regex.is_match("my_av_1-9.mp-4"));
+        assert!(!regex.is_match("my_av_1-9."));
     }
 }
