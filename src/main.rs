@@ -129,13 +129,12 @@ async fn main() -> anyhow::Result<()> {
         validator: Regex::new(R)? 
     }).expect("static properties are already initialized");
 
-    let r = Regex::new(R)?;
-    PathFilter::register_wisp_regex("validation", r);
+    PathFilter::register_wisp_regex("validation", Regex::new(R)?);
     let router = Router::new()
         .push(Router::with_path("upload").post(upload))
         .push(
             Router::with_path("download/{**file:validation}").get(
-                StaticDir::new(home).auto_list(true).include_dot_files(true)
+                StaticDir::new(home).include_dot_files(true)
             )
         );
 
