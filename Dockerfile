@@ -5,9 +5,9 @@ WORKDIR /chokotto
 ARG UID=
 ARG GID=
 
-RUN groupadd -g $GID appgroup && useradd -m -u $UID -g appgroup appuser
+RUN groupadd -g $GID choko && useradd -m -u $UID -g appgroup choko
 
-USER appuser
+USER choko
 
 COPY --chown=$UID:$GID target/release/chokotto2 /chokotto/chokotto2
 
