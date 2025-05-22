@@ -1,10 +1,14 @@
-FROM gcr.io/distroless/cc-debian12:nonroot
+FROM ubuntu:24.04
 
 WORKDIR /chokotto
 
-COPY --chown=nonroot:nonroot target/release/chokotto2 /chokotto/chokotto2
+ARG UID=
+ARG GID=
 
-USER nonroot:nonroot
+RUN groupadd -g $GID appgroup && useradd -m -u $UID -g appgroup appuser
+
+USER appuser
+
+COPY --chown=$UID:$GID target/release/chokotto2 /chokotto/chokotto2
 
 ENTRYPOINT ["/chokotto/chokotto2"]
-
