@@ -4,7 +4,7 @@ use std::{
     sync::OnceLock
 };
 use anyhow::bail;
-use salvo::{prelude::*, routing::PathFilter};
+use salvo::{catcher::Catcher, prelude::*, routing::PathFilter};
 use clap::Parser;
 use regex::Regex;
 use tracing::info;
@@ -104,6 +104,20 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
     }
 }
 
+#[handler]
+async fn catch(res: &mut Response, ctrl: &mut FlowCtrl) {
+    if let Some(code) = res.status_code {
+        if let Some(e) = StatusError::from_code(code) {
+            res.render(e);
+            ctrl.skip_rest();
+            return;
+        }
+    }
+
+    res.render("unknown error");
+    ctrl.skip_rest();
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     if cfg!(debug_assertions) {
@@ -138,7 +152,9 @@ async fn main() -> anyhow::Result<()> {
             )
         );
 
-    Server::new(tcp_listener).try_serve(router).await?;
+    let catcher = Catcher::new(catch);
+    let service = Service::new(router).catcher(catcher);
+    Server::new(tcp_listener).try_serve(service).await?;
 
     Ok(())
 }
