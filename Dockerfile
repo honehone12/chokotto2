@@ -5,7 +5,7 @@ WORKDIR /chokotto
 ARG UID=
 ARG GID=
 
-RUN groupadd -g $GID choko && useradd -m -u $UID -g appgroup choko
+RUN groupadd -g $GID choko && useradd -m -u $UID -g choko choko
 
 USER choko
 
