@@ -7,7 +7,7 @@ use anyhow::bail;
 use salvo::{catcher::Catcher, prelude::*, routing::PathFilter};
 use clap::Parser;
 use regex::Regex;
-use tracing::info;
+use tracing::{info, warn};
 use tokio::fs;
 
 #[derive(Parser)]
@@ -73,16 +73,16 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
     };
     
     let Some(file) = req.file("file").await else {
-        res.render(StatusError::bad_request());
+        res.status_code(StatusCode::BAD_REQUEST);
         return Ok(())
     };
 
     let Some(file_name) = file.name() else {
-        res.render(StatusError::bad_request());
+        res.status_code(StatusCode::BAD_REQUEST);
         return Ok(())
     };
     if !validator.is_match(file_name) {
-        res.render(StatusError::bad_request());
+        res.status_code(StatusCode::BAD_REQUEST);
         return Ok(())
     }
 
@@ -97,7 +97,8 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
     match fs::copy(tmp_path, &dst_path).await {
         Ok(n) => {
             info!("uploaded {n}bytes: {dst_path:?}");
-            res.render("ok");
+            res.status_code(StatusCode::OK)
+                .render(format!("Ok: uploaded {n}bytes"));
             Ok(())
         }
         Err(e) => bail!(e)
@@ -108,20 +109,25 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
 async fn catch(res: &mut Response, ctrl: &mut FlowCtrl) {
     if let Some(code) = res.status_code {
         if let Some(e) = StatusError::from_code(code) {
-            res.render(e);
+            warn!(e.brief);
+            res.render(e.name);
             ctrl.skip_rest();
             return;
         }
     }
 
-    res.render("unknown error");
+    warn!("unknown error, response without code");
+    res.status_code(StatusCode::INTERNAL_SERVER_ERROR)
+        .render("unknown error");
     ctrl.skip_rest();
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     if cfg!(debug_assertions) {
-        tracing_subscriber::fmt().init();
+        tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::INFO)
+            .init();
     } else {
         tracing_subscriber::fmt()
             .with_max_level(tracing::Level::WARN)
