@@ -66,6 +66,12 @@ async fn make_dst_name(file_path: &PathBuf) -> anyhow::Result<Option<PathBuf>> {
     }
 }
 
+fn bad_request(res: &mut Response) -> anyhow::Result<()> {
+    res.status_code(StatusCode::BAD_REQUEST)
+            .render("Bad request");
+    Ok(())
+}
+
 #[handler]
 async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
     let Some(Properties{ home, validator }) = PROPS.get() else {
@@ -73,17 +79,14 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
     };
     
     let Some(file) = req.file("file").await else {
-        res.status_code(StatusCode::BAD_REQUEST);
-        return Ok(())
+        return bad_request(res);
     };
 
     let Some(file_name) = file.name() else {
-        res.status_code(StatusCode::BAD_REQUEST);
-        return Ok(())
+        return bad_request(res);
     };
     if !validator.is_match(file_name) {
-        res.status_code(StatusCode::BAD_REQUEST);
-        return Ok(())
+        return bad_request(res);
     }
 
     let tmp_path = file.path();
