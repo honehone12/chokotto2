@@ -1,4 +1,4 @@
-FROM docker pull debian:bookworm-slim
+FROM docker debian:bookworm-slim
 
 WORKDIR /chokotto
 
