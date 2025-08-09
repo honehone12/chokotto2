@@ -68,7 +68,7 @@ async fn make_dst_name(file_path: &PathBuf) -> anyhow::Result<Option<PathBuf>> {
 
 fn bad_request(res: &mut Response) -> anyhow::Result<()> {
     res.status_code(StatusCode::BAD_REQUEST)
-            .render("Bad request");
+        .render("Bad request");
     Ok(())
 }
 

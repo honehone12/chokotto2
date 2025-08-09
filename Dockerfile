@@ -2,8 +2,8 @@ FROM ubuntu:24.04
 
 WORKDIR /chokotto
 
-ARG UID=
-ARG GID=
+ARG UID=1000
+ARG GID=1000
 
 RUN groupadd -g $GID choko && useradd -m -u $UID -g choko choko
 
