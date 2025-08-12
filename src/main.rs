@@ -94,7 +94,7 @@ async fn upload(req: &mut Request, res: &mut Response) -> anyhow::Result<()> {
     dst_path.push(file_name);
 
     if let Some(new_path) = make_dst_name(&dst_path).await? {
-        dst_path = new_path
+        dst_path = new_path;
     }
     
     match fs::copy(tmp_path, &dst_path).await {
@@ -140,7 +140,7 @@ async fn main() -> anyhow::Result<()> {
     let Args { home, listen_addr, port } = Args::parse();
     
     if !fs::try_exists(&home).await? {
-        fs::create_dir_all(&home).await?
+        fs::create_dir_all(&home).await?;
     }
     info!("home is: {home:?}");
 
